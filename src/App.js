@@ -5,7 +5,7 @@ import HomePage from './pages/homepage/homepage.component';
 import ShopPage from "./pages/shop/shop.component";
 import Header from "./components/header/header.component";
 import SignInAndSignUpComponent from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
-import { auth } from './firebase/firebase.utils';
+import { auth , createUserProfileDocument } from './firebase/firebase.utils';
 
 class App extends React.Component {
     constructor() {
@@ -18,14 +18,37 @@ class App extends React.Component {
     unsubscribeFromAuth = null;
 
     componentDidMount() {//open subscription
-        auth.onAuthStateChanged((user)=>{
-            this.setState({currentUser : user})
+        //method on auth library
+        // auth.onAuthStateChanged(async user=>{
+        //     this.setState({currentUser : user})
+        //     await createUserProfileDocument(user);
+        //     console.log('componentDidMount ',user);
+        //
+        // })
 
-            console.log(user);
-        })
+        this.unsubscribeFromAuth = auth.onAuthStateChanged((async  userAuth=>{
+            if(userAuth){
+                const userRef = await createUserProfileDocument(userAuth);
+
+                userRef.onSnapshot(snapshot => {
+                     //console.log('snapshot', snapshot.data());
+
+                     this.setState({
+                         currentUser: {
+                             id:snapshot.id,
+                             ...snapshot.data()
+                         }
+                     }, ()=>{
+                         console.log('currentstate', this.state);
+
+                     })
+                })
+            }
+            this.setState({currentUser: userAuth });//user signed out
+        }))
     }
     componentWillUnmount() {
-        this.unsubscribeFromAuth();
+        this.unsubscribeFromAuth();//to prevent memory leak
     }
 
     render() {
