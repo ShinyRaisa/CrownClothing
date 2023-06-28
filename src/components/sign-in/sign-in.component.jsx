@@ -81,7 +81,6 @@ import './sign-in.style.scss';
 class SignIn extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
             email: '',
             password: ''
@@ -103,7 +102,6 @@ class SignIn extends React.Component {
 
     handleChange = event => {
         const { value, name } = event.target;
-
         this.setState({ [name]: value });
     };
 
